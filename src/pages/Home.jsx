@@ -1,27 +1,143 @@
+import { useEffect, useRef } from 'react';
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ScrollFloat from '../components/ui/ScrollFloat';
 import Beams from '../components/ui/Beams';
 import RotatingText from '../components/ui/RotatingText';
 import ScrambledText from '../components/ui/ScrambledText';
 import SplitText from '../components/ui/SplitText';
 
+// Register the plugin
+gsap.registerPlugin(ScrollTrigger);
+
 function Home() {
+  const heroRef = useRef(null);
+  const secondSectionRef = useRef(null);
+  const thirdSectionRef = useRef(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Hero section fade in on load
+      gsap.fromTo(heroRef.current, 
+        {
+          opacity: 0,
+          y: 50
+        },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1.5,
+          ease: "power3.out"
+        }
+      );
+
+      // Second section scroll reveal
+      gsap.set(secondSectionRef.current, {
+        opacity: 0,
+        y: 80,
+        scale: 0.95
+      });
+      
+      ScrollTrigger.create({
+        trigger: secondSectionRef.current,
+        start: "top 85%",
+        end: "top 50%",
+        scrub: 1,
+        onUpdate: (self) => {
+          gsap.to(secondSectionRef.current, {
+            opacity: self.progress,
+            y: 80 * (1 - self.progress),
+            scale: 0.95 + (0.05 * self.progress),
+            duration: 0.3,
+            ease: "power2.out"
+          });
+        }
+      });
+
+      // Second section background color change
+      ScrollTrigger.create({
+        trigger: secondSectionRef.current,
+        start: "top center",
+        end: "bottom center",
+        onEnter: () => {
+          gsap.to("body", {
+            backgroundColor: "#111111",
+            duration: 0.5
+          });
+        },
+        onLeaveBack: () => {
+          gsap.to("body", {
+            backgroundColor: "#000000",
+            duration: 0.5
+          });
+        }
+      });
+
+      // Third section scroll reveal with staggered elements
+      const thirdSectionContainer = thirdSectionRef.current.querySelector('.max-w-3xl');
+      
+      gsap.set(thirdSectionContainer, {
+        opacity: 0,
+        y: 100,
+        scale: 0.9
+      });
+
+      // Container reveal
+      ScrollTrigger.create({
+        trigger: thirdSectionRef.current,
+        start: "top 80%",
+        end: "top 40%",
+        scrub: 1.5,
+        onUpdate: (self) => {
+          gsap.to(thirdSectionContainer, {
+            opacity: self.progress,
+            y: 100 * (1 - self.progress),
+            scale: 0.9 + (0.1 * self.progress),
+            duration: 0.4,
+            ease: "power3.out"
+          });
+        }
+      });
+
+      // Additional third section background reveal
+      gsap.fromTo(thirdSectionRef.current,
+        {
+          backgroundPosition: "50% 100%"
+        },
+        {
+          backgroundPosition: "50% 50%",
+          ease: "none",
+          scrollTrigger: {
+            trigger: thirdSectionRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true
+          }
+        }
+      );
+
+      // Parallax effect for beams
+      gsap.to(heroRef.current.querySelector('.absolute.inset-0'), {
+        yPercent: -50,
+        ease: "none",
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true
+        }
+      });
+
+    });
+
+    return () => ctx.revert(); // Cleanup
+  }, []);
+
   return (
     <div className='h-screen w-full text-white font-mono'>
-      <section>
-        <div className='relative flex items-center justify-center h-svh md:h-140 bg-gradient-to-br from-black to-neutral-800'>
-          <div className='absolute inset-0 z-0'>
-            <Beams
-              beamWidth={1}
-              beamHeight={30}
-              beamNumber={30}
-              lightColor='#ffffff'
-              speed={1.1}
-              noiseIntensity={1.75}
-              scale={0.2}
-              rotation={30}
-            />
-          </div>
-          <p className='flex items-center gap-2 z-1 text-2xl sm:text-3xl md:text-4xl font-semibold text-center'>
+      <section ref={heroRef}>
+        <div className='relative flex items-center justify-center h-svh md:h-140'>
+          <p className='flex items-center gap-2 z-1 text-xl sm:text-3xl md:text-4xl font-semibold text-center'>
             Transforming ideas into
             <RotatingText
               texts={[
@@ -44,38 +160,27 @@ function Home() {
           </p>
         </div>
       </section>
-      <section className='flex items-center justify-center bg-black h-90 w-full'>
-        <div className=''>
-          {/* <SplitText
-            text=''
-            className='text-2xl font-semibold text-center'
-            delay={30}
-            duration={2}
-            ease='power3.out'
-            splitType='chars'
-            from={{ opacity: 0, y: 40 }}
-            to={{ opacity: 1, y: 0 }}
-            threshold={0.2}
-            // rootMargin='-100px'
-            textAlign='center'
-          /> */}
+      
+      <section ref={secondSectionRef} className='flex items-center justify-center bg-black h-90 w-full overflow-hidden'>
+        <div className='transform-gpu'>
           <ScrollFloat
-            animationDuration={1}
+            animationDuration={1.5}
             ease='back.inOut(2)'
-            scrollStart='center bottom+=50%'
-            scrollEnd='bottom bottom-=40%'
-            stagger={0.06}
-            className='text-xl font-semibold '
+            scrollStart='top 75%'
+            scrollEnd='center 50%'
+            stagger={0.08}
+            className='text-xl font-semibold'
           >
             Let's build something amazing together!
           </ScrollFloat>
         </div>
       </section>
-      <section>
-        <div className='flex items-center justify-center h-svh md:h-140 bg-gradient-to-br from-black to-neutral-800'>
-          <div className='max-w-3xl text-center p-4'>
+      
+      <section ref={thirdSectionRef} className='overflow-hidden'>
+        <div className='flex items-center justify-center h-svh md:h-140'>
+          <div className='max-w-3xl text-center p-4 transform-gpu backdrop-blur-sm'>
             <ScrambledText
-              className='text-2xl sm:text-3xl md:text-4xl font-semibold'
+              className='text-2xl sm:text-3xl md:text-4xl text-pretty font-semibold'
               radius={100}
               duration={1.2}
               speed={0.5}
