@@ -87,7 +87,7 @@ function Home() {
               seamless user interfaces and backend systems using modern
               frameworks and cloud-based infrastructure. My focus is on
               delivering real-world solutions that align with business goals
-              while maintaining technical excellence.
+              while maintaining technical excellence...
             </ScrambledText>
           </div>
         </div>
