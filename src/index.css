@@ -1,0 +1,10 @@
+@import 'tailwindcss';
+
+@theme {
+    --font-host: Host Grotesk, sans-serif;
+    --font-inter: Inter, sans-serif;
+    --font-jost: Jost, sans-serif;
+    --font-karla: Karla, sans-serif;
+    --font-libre-franklin: Libre Franklin, sans-serif;
+    --font-o-sans: Open Sans, sans-serif;
+}
